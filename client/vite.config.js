@@ -1,0 +1,30 @@
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
+
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      protocolImports: true,
+    }),
+    tailwindcss(),
+    react(),
+  ],
+  resolve: {
+    alias: {
+      // Ensure we use the npm Buffer polyfill, not Node core externalization
+      buffer: "buffer/",
+    },
+  },
+  define: {
+    global: "globalThis",
+  },
+});
