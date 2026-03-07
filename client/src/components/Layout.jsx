@@ -1,4 +1,13 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { 
+  Rocket, 
+  LayoutDashboard, 
+  PlusCircle, 
+  LogOut, 
+  Wallet, 
+  Compass,
+  User as UserIcon
+} from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useWallet } from "../context/WalletContext";
 
@@ -18,105 +27,127 @@ const Layout = ({ children }) => {
     navigate("/");
   };
 
+  const navLinks = [
+    { to: "/campaigns", label: "Explore", icon: Compass },
+    ...(user ? [
+      { to: "/campaigns/create", label: "Create", icon: PlusCircle },
+      { to: "/profile", label: "Profile", icon: UserIcon },
+    ] : []),
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-brand-900 via-slate-950 to-brand-800 text-white">
-      <header className="border-b border-white/10 bg-slate-900/60 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-2xl bg-gradient-to-tr from-brand-400 to-brand-200 shadow-lg shadow-brand-500/40 flex items-center justify-center text-xl font-black">
-              F
+    <div className="min-h-screen flex flex-col relative overflow-hidden">
+      {/* Dynamic Background Glows */}
+      <div className="glow-mesh" />
+      
+      <header className="sticky top-0 z-50 glass-nav">
+        <div className="mx-auto max-w-7xl px-4 md:px-6 h-20 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="h-11 w-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 shadow-xl shadow-brand-500/20 flex items-center justify-center text-white scale-100 group-hover:scale-105 transition-transform duration-300">
+              <Rocket size={24} fill="currentColor" fillOpacity={0.2} />
             </div>
-            <div>
-              <div className="font-semibold tracking-tight">
-                Fundify Campus
+            <div className="hidden sm:block">
+              <div className="font-bold text-xl tracking-tight text-white">
+                Fundify <span className="text-brand-400">Campus</span>
               </div>
-              <div className="text-xs text-slate-300">
-                Empowering Student Innovation
+              <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                Student Innovation Launchpad
               </div>
             </div>
           </Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link
-              to="/campaigns"
-              className="text-slate-200 hover:text-white transition-colors"
-            >
-              Explore
-            </Link>
-            {user && (
-              <>
+
+          <nav className="flex items-center gap-1 md:gap-6">
+            <div className="hidden md:flex items-center gap-1">
+              {navLinks.map((link) => (
                 <Link
-                  to="/campaigns/create"
-                  className="text-slate-200 hover:text-white transition-colors"
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                    location.pathname === link.to
+                      ? "bg-white/10 text-white"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
                 >
-                  Create
+                  <link.icon size={18} />
+                  {link.label}
                 </Link>
-                <Link
-                  to="/dashboard"
-                  className="text-slate-200 hover:text-white transition-colors"
-                >
-                  Dashboard
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 pl-4 border-l border-white/10">
+              {!user && !isAuthPage && (
+                <Link to="/login" className="btn-primary py-2 px-5 text-sm h-10">
+                  <UserIcon size={18} />
+                  Sign in
                 </Link>
-              </>
-            )}
-            {!user && !isAuthPage && (
-              <Link
-                to="/login"
-                className="rounded-full bg-gradient-to-r from-brand-400 to-brand-200 px-4 py-1.5 text-sm font-medium text-slate-950 shadow-md shadow-brand-500/40 hover:shadow-brand-400/60 transition-shadow"
-              >
-                Sign in
-              </Link>
-            )}
-            {user && (
-              <div className="flex items-center gap-2 text-xs text-slate-200">
-                {accountAddress ? (
-                  <>
-                    <span className="hidden md:inline-flex rounded-full bg-slate-900/70 px-2 py-1 border border-white/10">
-                      <span className="text-[10px] text-slate-400 mr-1">
-                        Wallet
-                      </span>
-                      <span className="font-mono">
-                        {accountAddress.slice(0, 6)}...
-                        {accountAddress.slice(-4)}
-                      </span>
-                    </span>
-                    <span className="hidden md:inline text-brand-100">
-                      {balance != null ? `${balance.toFixed(2)} ALGO` : "--"}
-                    </span>
+              )}
+
+              {user && (
+                <div className="flex items-center gap-3">
+                  {accountAddress ? (
+                    <div className="flex items-center gap-2">
+                      <div className="hidden lg:flex flex-col items-end text-right">
+                        <span className="text-[10px] items-center gap-1 font-bold text-slate-500 flex uppercase tracking-tighter">
+                          <Wallet size={10} /> Connected
+                        </span>
+                        <div className="text-sm font-mono font-medium text-brand-300">
+                          {balance != null ? `${balance.toFixed(2)} ALGO` : "--- ALGO"}
+                        </div>
+                      </div>
+                      <button
+                        onClick={disconnectWallet}
+                        className="h-10 px-4 glass-card rounded-xl text-sm font-medium hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all flex items-center gap-2"
+                      >
+                        <span className="hidden sm:inline font-mono">
+                          {accountAddress.slice(0, 4)}...{accountAddress.slice(-4)}
+                        </span>
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      </button>
+                    </div>
+                  ) : (
                     <button
-                      onClick={disconnectWallet}
-                      className="rounded-full border border-white/20 px-2 py-1 text-[11px] text-slate-100 hover:bg-white/10 transition-colors"
+                      onClick={connectWallet}
+                      disabled={connecting}
+                      className="btn-primary py-2 px-5 text-sm h-10"
                     >
-                      Disconnect
+                      <Wallet size={18} />
+                      {connecting ? "Connecting..." : "Connect Wallet"}
                     </button>
-                  </>
-                ) : (
+                  )}
+
                   <button
-                    onClick={connectWallet}
-                    disabled={connecting}
-                    className="rounded-full border border-brand-300/70 bg-slate-900/70 px-3 py-1 text-[11px] font-medium text-brand-100 hover:bg-slate-800/80 transition-colors disabled:opacity-60"
+                    onClick={handleLogout}
+                    title="Logout"
+                    className="h-10 w-10 flex items-center justify-center rounded-xl bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-300"
                   >
-                    {connecting ? "Connecting..." : "Connect Pera Wallet"}
+                    <LogOut size={20} />
                   </button>
-                )}
-              </div>
-            )}
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="rounded-full border border-white/20 px-3 py-1 text-xs font-medium text-slate-100 hover:bg-white/10 transition-colors"
-              >
-                Logout
-              </button>
-            )}
+                </div>
+              )}
+            </div>
           </nav>
         </div>
       </header>
-      <main className="flex-1">
-        <div className="mx-auto max-w-6xl px-4 py-6">{children}</div>
+
+      <main className="flex-1 w-full mx-auto max-w-7xl px-4 md:px-6 py-10 relative z-10">
+        {children}
       </main>
-      <footer className="border-t border-white/10 py-4 text-center text-xs text-slate-400">
-        © {new Date().getFullYear()} Fundify Campus · Built for student
-        innovation.
+
+      <footer className="glass-nav py-12 mt-auto border-t border-white/5 relative z-10">
+        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3 opacity-60">
+            <Rocket size={20} className="text-brand-400" />
+            <span className="text-sm font-semibold tracking-tight">Fundify Campus</span>
+          </div>
+          <div className="text-xs text-slate-500 font-medium">
+            &copy; {new Date().getFullYear()} · Empowering Student Innovation on Algorand
+          </div>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-xs text-slate-500 hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="text-xs text-slate-500 hover:text-white transition-colors">Terms</a>
+            <a href="#" className="text-xs text-slate-500 hover:text-white transition-colors">Docs</a>
+          </div>
+        </div>
       </footer>
     </div>
   );

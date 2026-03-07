@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { UserPlus, Mail, Lock, User, ChevronRight, Rocket } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -20,7 +21,7 @@ const RegisterPage = () => {
     try {
       const { data } = await api.post("/auth/register", form);
       login(data);
-      toast.success("Welcome to Fundify Campus!");
+      toast.success("Welcome to the Fundify community!");
       navigate("/campaigns");
     } catch (err) {
       const message =
@@ -33,65 +34,94 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="mx-auto max-w-md rounded-3xl border border-white/10 bg-slate-900/70 p-6 shadow-2xl shadow-slate-900/80">
-      <h2 className="text-xl font-semibold mb-1">Create your account</h2>
-      <p className="text-xs text-slate-300 mb-5">
-        Launch campaigns, track funding, and celebrate impact with your campus.
-      </p>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1">
-          <label className="text-xs text-slate-200">Full name</label>
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-300"
-            placeholder="Alex from Robotics Club"
-          />
+    <div className="max-w-md mx-auto py-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="glass-card rounded-[40px] p-10 border-white/10 shadow-2xl relative overflow-hidden">
+        {/* Background Decoration */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 space-y-8">
+          <div className="text-center space-y-2">
+            <div className="w-16 h-16 rounded-2xl bg-brand-500/10 flex items-center justify-center text-brand-400 mx-auto mb-4">
+               <UserPlus size={32} />
+            </div>
+            <h2 className="text-3xl font-black text-white italic uppercase tracking-tighter">Join The Mission</h2>
+            <p className="text-slate-500 text-sm font-medium">Create your campus innovator account today.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="form-input h-14 pl-12 text-sm"
+                  placeholder="Alex Johnson"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Campus Email</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className="form-input h-14 pl-12 text-sm"
+                  placeholder="you@campus.edu"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Secure Password</label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  className="form-input h-14 pl-12 text-sm"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary h-14 w-full text-lg font-black uppercase tracking-wider group mt-4"
+            >
+              {loading ? "CREATING ACCOUNT..." : (
+                <span className="flex items-center gap-2">LAUNCH ACCOUNT <Rocket size={20} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" /></span>
+              )}
+            </button>
+          </form>
+
+          <div className="pt-6 border-t border-white/5 text-center">
+            <p className="text-xs text-slate-500 font-bold">
+              ALREADY REGISTERED?{" "}
+              <Link
+                to="/login"
+                className="text-brand-400 hover:text-brand-300 transition-colors ml-1 uppercase"
+              >
+                Sign In
+              </Link>
+            </p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <label className="text-xs text-slate-200">Campus email</label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-300"
-            placeholder="you@campus.edu"
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs text-slate-200">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            required
-            className="w-full rounded-xl border border-white/10 bg-slate-900/70 px-3 py-2 text-sm text-white outline-none focus:border-brand-300 focus:ring-1 focus:ring-brand-300"
-            placeholder="Create a secure password"
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 w-full rounded-full bg-gradient-to-r from-brand-400 via-brand-300 to-brand-200 px-4 py-2 text-sm font-semibold text-slate-950 shadow-md shadow-brand-500/40 hover:shadow-brand-400/60 transition-all disabled:opacity-60"
-        >
-          {loading ? "Creating account..." : "Create account"}
-        </button>
-      </form>
-      <p className="mt-4 text-xs text-slate-300">
-        Already using Fundify Campus?{" "}
-        <Link
-          to="/login"
-          className="font-medium text-brand-200 hover:text-brand-100"
-        >
-          Sign in
-        </Link>
-      </p>
+      </div>
     </div>
   );
 };

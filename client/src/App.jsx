@@ -9,7 +9,7 @@ import RegisterPage from "./pages/RegisterPage";
 import CampaignListPage from "./pages/CampaignListPage";
 import CampaignDetailPage from "./pages/CampaignDetailPage";
 import CreateCampaignPage from "./pages/CreateCampaignPage";
-import DashboardPage from "./pages/DashboardPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -31,7 +31,7 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/campaigns" element={<CampaignListPage />} />
-              <Route path="/campaigns/:id" element={<CampaignDetailPage />} />
+              <Route path="/campaign/:id" element={<CampaignDetailPage />} />
               <Route
                 path="/campaigns/create"
                 element={
@@ -41,10 +41,10 @@ function App() {
                 }
               />
               <Route
-                path="/dashboard"
+                path="/profile"
                 element={
                   <PrivateRoute>
-                    <DashboardPage />
+                    <ProfilePage />
                   </PrivateRoute>
                 }
               />
