@@ -47,6 +47,17 @@ const campaignSchema = new Schema(
         ref: "Contribution",
       },
     ],
+    escrowAddress: {
+      type: String,
+    },
+    escrowMnemonic: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["active", "completed", "deleted", "withdrawn"],
+      default: "active",
+    },
   },
   { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }
 );

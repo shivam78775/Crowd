@@ -88,10 +88,10 @@ const ContributionDetailModal = ({ isOpen, onClose, contribution }) => {
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Transaction ID (TXID)</label>
                 <div className="group relative flex items-center">
                   <div className="flex-1 bg-slate-950/50 border border-white/10 rounded-2xl py-4 px-6 font-mono text-xs text-brand-400 break-all pr-14 leading-relaxed">
-                    {shortenedHash(contribution.transactionHash)}
+                    {contribution.status === 'refunded' ? `REFUND: ${contribution.refundTxId}` : shortenedHash(contribution.transactionHash)}
                   </div>
                   <button 
-                    onClick={() => handleCopy(contribution.transactionHash, 'txid')}
+                    onClick={() => handleCopy(contribution.status === 'refunded' ? contribution.refundTxId : contribution.transactionHash, 'txid')}
                     className="absolute right-3 p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white transition-colors group-hover:bg-brand-500/20 group-hover:text-brand-400"
                   >
                     {copiedField === 'txid' ? <Check size={16} /> : <Copy size={16} />}

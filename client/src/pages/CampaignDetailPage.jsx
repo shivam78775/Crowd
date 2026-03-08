@@ -83,7 +83,7 @@ const CampaignDetailPage = () => {
     setContributing(true);
     try {
       const txId = await sendPayment({
-        to: campaign.creatorWallet,
+        to: campaign.escrowAddress, // Send to Escrow instead of Creator
         amountAlgo: value,
       });
 
@@ -147,6 +147,38 @@ const CampaignDetailPage = () => {
   const contributors = campaign.contributors || [];
   const deadlineDate = campaign.deadline ? new Date(campaign.deadline) : null;
   const isExpired = deadlineDate && deadlineDate < new Date();
+  const isGoalReached = campaign.raisedAmount >= campaign.goalAmount;
+  const isDeleted = campaign.status === "deleted";
+  const isCreator = user?._id === campaign.creator?._id;
+
+  const handleWithdraw = async () => {
+    try {
+      setContributing(true);
+      await api.post(`/campaign/${id}/withdraw`);
+      toast.success("Funds withdrawn to your wallet!");
+      const { data } = await api.get(`/campaign/${id}`);
+      setCampaign(data);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Withdrawal failed");
+    } finally {
+      setContributing(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    try {
+      setContributing(true);
+      await api.post(`/campaign/${id}/refund`);
+      toast.success("Refund processed successfully!");
+      const { data } = await api.get(`/campaign/${id}`);
+      setCampaign(data);
+      refreshBalance();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Refund failed");
+    } finally {
+      setContributing(false);
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -182,6 +214,17 @@ const CampaignDetailPage = () => {
               <Clock size={16} className="text-amber-400" />
               {isExpired ? "Campaign Closed" : `Ends on ${deadlineDate?.toLocaleDateString()}`}
             </div>
+            {isDeleted && (
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-[10px] font-bold uppercase tracking-widest text-red-400">
+                <AlertCircle size={12} /> Campaign Deleted
+              </div>
+            )}
+            {!isDeleted && isExpired && (
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${isGoalReached ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400" : "bg-amber-500/20 border-amber-500/30 text-amber-400"}`}>
+                {isGoalReached ? <ShieldCheck size={12} /> : <AlertCircle size={12} />}
+                {isGoalReached ? "Goal Reached" : "Goal Not Met"}
+              </div>
+            )}
           </div>
         </div>
 
@@ -315,8 +358,33 @@ const CampaignDetailPage = () => {
                 <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-3">
                   <ShieldCheck size={18} className="text-amber-500 flex-shrink-0 mt-0.5" />
                   <div className="text-[11px] text-amber-200/60 leading-relaxed font-medium">
-                    Funds will be sent directly to the creator's verified Algorand wallet address.
+                    Funds are held in a secure, uniquely generated escrow account ({campaign.escrowAddress ? `\`${campaign.escrowAddress.slice(0, 6)}...\`` : "Verifying..."}) until the goal is met or the deadline passes.
                   </div>
+                </div>
+              )}
+
+              {/* Action Buttons for Withdrawal/Refund */}
+              {user && (
+                <div className="space-y-3 pt-2">
+                  {isCreator && isGoalReached && isExpired && campaign.status !== "withdrawn" && (
+                    <button
+                      onClick={handleWithdraw}
+                      disabled={contributing}
+                      className="w-full py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/20"
+                    >
+                      Withdraw Funds
+                    </button>
+                  )}
+                  
+                  {!isCreator && (isDeleted || (isExpired && !isGoalReached)) && (
+                    <button
+                      onClick={handleRefund}
+                      disabled={contributing}
+                      className="w-full py-4 rounded-2xl bg-amber-600 hover:bg-amber-500 text-white font-black text-sm uppercase tracking-widest transition-all shadow-lg shadow-amber-500/20"
+                    >
+                      Claim Refund
+                    </button>
+                  )}
                 </div>
               )}
             </div>

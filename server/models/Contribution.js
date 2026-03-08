@@ -33,6 +33,15 @@ const contributionSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    status: {
+      type: String,
+      enum: ["funded", "refunded"],
+      default: "funded",
+    },
+    refundTxId: {
+      type: String,
+      trim: true,
+    },
   },
   { timestamps: false }
 );

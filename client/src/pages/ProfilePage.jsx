@@ -14,7 +14,8 @@ import {
   Wallet,
   Mail,
   Clock,
-  Info
+  Info,
+  Trash2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -73,6 +74,41 @@ const ProfilePage = () => {
   const handleOpenModal = (contribution) => {
     setSelectedContribution(contribution);
     setIsModalOpen(true);
+  };
+
+  const handleRefund = async (contribution) => {
+    try {
+      setLoading(true);
+      await api.post(`/campaign/${contribution.campaignId._id}/refund`);
+      toast.success("Refund processed successfully!");
+      const { data: updatedData } = await api.get("/user/dashboard");
+      setData(updatedData);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Refund failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (e, campaignId) => {
+    e.preventDefault(); // Prevent navigation
+    e.stopPropagation();
+    
+    if (!window.confirm("Are you sure you want to delete this campaign? Contributors will be able to claim refunds immediately.")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await api.delete(`/campaign/${campaignId}`);
+      toast.success("Campaign deleted successfully.");
+      const { data: updatedData } = await api.get("/user/dashboard");
+      setData(updatedData);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Delete failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -225,29 +261,44 @@ const ProfilePage = () => {
               {myCampaigns.map((c) => {
                 const progress = c.goalAmount && c.goalAmount > 0 ? Math.min(100, (c.raisedAmount / c.goalAmount) * 100) : 0;
                 return (
-                  <Link 
-                    to={`/campaign/${c._id}`} 
-                    key={c._id}
-                    className="group block glass-card rounded-[32px] p-6 hover:bg-white/5 transition-all duration-300 border-white/5"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="space-y-1">
-                        <div className="font-bold text-white group-hover:text-brand-400 transition-colors">{c.title}</div>
-                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
-                          <Calendar size={12} /> {c.deadline ? new Date(c.deadline).toLocaleDateString() : 'Active'}
+                  <div key={c._id} className="relative group">
+                    <Link 
+                      to={`/campaign/${c._id}`} 
+                      className="block glass-card rounded-[32px] p-6 hover:bg-white/5 transition-all duration-300 border-white/5"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="space-y-1 pr-12">
+                          <div className="font-bold text-white group-hover:text-brand-400 transition-colors">{c.title}</div>
+                          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                            <ShieldCheck size={10} className="text-emerald-500" />
+                            {c.status === 'active' ? 'Live on Chain' : c.status.toUpperCase()}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                           <div className="text-xs font-bold text-slate-400">Raised</div>
+                           <div className="font-black text-white italic">{c.raisedAmount.toLocaleString()} <span className="text-[10px] not-italic text-slate-500">ALGO</span></div>
                         </div>
                       </div>
-                      <ExternalLink size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-[11px] font-black uppercase tracking-widest">
-                        <span className="text-brand-400">{c.raisedAmount.toLocaleString()} ALGO</span>
-                        <span className="text-slate-600">Goal: {c.goalAmount.toLocaleString()} ALGO</span>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-[10px] font-black uppercase tracking-tighter">
+                          <span className="text-brand-400">{Math.round(progress)}% Complete</span>
+                          <span className="text-slate-500">Goal: {c.goalAmount} ALGO</span>
+                        </div>
+                        <ProgressBar value={progress} size="sm" />
                       </div>
-                      <ProgressBar value={progress} />
-                    </div>
-                  </Link>
+                    </Link>
+
+                    {c.status !== 'deleted' && c.status !== 'withdrawn' && (
+                      <button
+                        onClick={(e) => handleDelete(e, c._id)}
+                        className="absolute top-6 right-6 p-2.5 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/20 opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
+                        title="Delete Campaign"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -302,8 +353,21 @@ const ProfilePage = () => {
                       <div className="font-black text-white text-lg italic whitespace-nowrap">
                         {c.amount.toLocaleString()} ALGO
                       </div>
-                      <div className="text-[10px] font-black text-brand-400 uppercase tracking-tighter">
-                        SUCCESS
+                      <div className="flex flex-col items-end">
+                        <div className={`text-[10px] font-black uppercase tracking-tighter ${c.status === 'refunded' ? 'text-amber-500' : 'text-brand-400'}`}>
+                          {c.status === 'refunded' ? 'REFUNDED' : 'SUCCESS'}
+                        </div>
+                        {c.status === 'funded' && (c.campaignId?.status === 'deleted' || (new Date(c.campaignId?.deadline) < new Date() && c.campaignId?.raisedAmount < c.campaignId?.goalAmount)) && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleRefund(c); }}
+                            className="mt-1 px-3 py-1 rounded-lg bg-amber-500/10 text-[9px] font-bold text-amber-400 hover:bg-amber-500 hover:text-white transition-all border border-amber-500/20"
+                          >
+                            Claim Refund
+                          </button>
+                        )}
+                        {c.status === 'funded' && c.campaignId?.status === 'deleted' && (
+                          <span className="text-[8px] font-bold text-red-400/60 uppercase mt-0.5 mt-1">Campaign Deleted</span>
+                        )}
                       </div>
                     </div>
                     <button 
