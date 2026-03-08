@@ -1,9 +1,20 @@
 import axios from "axios";
 
+const rawBaseURL = import.meta.env.VITE_API_BASE_URL || "";
+console.log("Raw VITE_API_BASE_URL:", rawBaseURL);
+
+// Ensure the URL ends with /api/
+let finalBaseURL = rawBaseURL;
+if (finalBaseURL && !finalBaseURL.includes("/api")) {
+  finalBaseURL = finalBaseURL.endsWith("/") ? `${finalBaseURL}api/` : `${finalBaseURL}/api/`;
+} else if (finalBaseURL && !finalBaseURL.endsWith("/")) {
+  finalBaseURL = `${finalBaseURL}/`;
+}
+
+console.log("Resolved Axios Base URL:", finalBaseURL);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL.endsWith('/') 
-    ? import.meta.env.VITE_API_BASE_URL 
-    : `${import.meta.env.VITE_API_BASE_URL}/`,
+  baseURL: finalBaseURL,
 });
 
 api.interceptors.request.use((config) => {
