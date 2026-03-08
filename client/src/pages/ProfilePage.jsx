@@ -16,7 +16,10 @@ import {
   Clock,
   Info,
   Trash2,
-  Award
+  Award,
+  Bell,
+  BellOff,
+  CheckCheck
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -110,6 +113,24 @@ const ProfilePage = () => {
       setLoading(false);
     }
   };
+
+  const handleMarkAsRead = async () => {
+    try {
+      await api.post("user/notifications/read");
+      setData(prev => ({
+        ...prev,
+        user: {
+          ...prev.user,
+          notifications: prev.user.notifications.map(n => ({ ...n, read: true }))
+        }
+      }));
+    } catch (err) {
+      console.error("Failed to mark as read", err);
+    }
+  };
+
+  const notifications = data.user?.notifications || [];
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
@@ -231,6 +252,55 @@ const ProfilePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Notifications Section */}
+      {notifications.length > 0 && (
+        <section className="glass-card rounded-[40px] p-8 border-brand-500/10 space-y-6">
+          <div className="flex items-center justify-between border-b border-white/5 pb-6">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Bell size={24} className="text-brand-400" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-slate-950 animate-pulse" />
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-white tracking-tight italic uppercase">Mission Alerts</h3>
+            </div>
+            {unreadCount > 0 && (
+              <button 
+                onClick={handleMarkAsRead}
+                className="flex items-center gap-2 text-[10px] font-black text-slate-500 hover:text-brand-400 transition-colors uppercase tracking-widest bg-white/5 px-3 py-1.5 rounded-xl border border-white/5"
+              >
+                <CheckCheck size={14} /> Mark all as read
+              </button>
+            )}
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[...notifications].reverse().slice(0, 4).map((n, i) => (
+              <div 
+                key={i} 
+                className={`p-5 rounded-[24px] border transition-all flex items-start gap-4 ${n.read ? 'bg-white/[0.02] border-white/5' : 'bg-brand-500/5 border-brand-500/20 shadow-lg shadow-brand-500/5'}`}
+              >
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  n.type === 'refund' ? 'bg-amber-500/10 text-amber-400' : 
+                  n.type === 'success' ? 'bg-emerald-500/10 text-emerald-400' :
+                  'bg-brand-500/10 text-brand-400'
+                }`}>
+                  {n.type === 'refund' ? <HandCoins size={20} /> : <Rocket size={20} />}
+                </div>
+                <div className="space-y-1 flex-1">
+                  <p className={`text-sm font-medium leading-relaxed ${n.read ? 'text-slate-400' : 'text-white'}`}>
+                    {n.message}
+                  </p>
+                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                    {new Date(n.createdAt).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-10">
         {/* Projects Section */}
@@ -359,8 +429,16 @@ const ProfilePage = () => {
                         {c.amount.toLocaleString()} ALGO
                       </div>
                       <div className="flex flex-col items-end">
-                        <div className={`text-[10px] font-black uppercase tracking-tighter ${c.status === 'refunded' ? 'text-amber-500' : 'text-brand-400'}`}>
-                          {c.status === 'refunded' ? 'REFUNDED' : 'SUCCESS'}
+                        <div className={`text-[10px] font-black uppercase tracking-tighter ${
+                          c.status === 'refunded' ? 'text-emerald-500' : 
+                          c.status === 'refund_failed' ? 'text-red-500' :
+                          (c.campaignId?.status === 'failed' || c.campaignId?.status === 'deleted') ? 'text-amber-500' :
+                          'text-brand-400'
+                        }`}>
+                          {c.status === 'refunded' ? 'REFUNDED' : 
+                           c.status === 'refund_failed' ? 'REFUND ERROR' :
+                           (c.campaignId?.status === 'failed' || c.campaignId?.status === 'deleted') ? 'SETTLING...' :
+                           'SUCCESS'}
                         </div>
                         {c.status === 'funded' && (c.campaignId?.status === 'deleted' || (new Date(c.campaignId?.deadline) < new Date() && c.campaignId?.raisedAmount < c.campaignId?.goalAmount)) && (
                           <button 

@@ -20,11 +20,12 @@ import ProgressBar from "../components/ProgressBar";
 import LoadingState from "../components/LoadingState";
 import { useWallet } from "../context/WalletContext";
 import { TESTNET_EXPLORER_TX_BASE } from "../services/algorand";
+import CountdownTimer from "../components/CountdownTimer";
 
 const CampaignDetailPage = () => {
   const { id } = useParams();
   const { user } = useAuth();
-  const { accountAddress, sendPayment, connectWallet, refreshBalance } = useWallet();
+  const { accountAddress, sendPayment, connectWallet, refreshBalance, balance } = useWallet();
   const [campaign, setCampaign] = useState(null);
   const [loading, setLoading] = useState(true);
   const [amount, setAmount] = useState("");
@@ -46,6 +47,10 @@ const CampaignDetailPage = () => {
       }
     };
     fetchCampaign();
+
+    // Data polling for "real-time" updates (every 10 seconds)
+    const interval = setInterval(fetchCampaign, 10000);
+    return () => clearInterval(interval);
   }, [id]);
 
   const handlePresetAmount = (val) => {
@@ -66,6 +71,11 @@ const CampaignDetailPage = () => {
     const value = Number(amount);
     if (!value || value <= 0) {
       toast.error("Please enter a valid ALGO amount.");
+      return;
+    }
+
+    if (balance !== null && balance < value + 0.001) {
+      toast.error(`Insufficient balance. You have ${balance.toFixed(2)} ALGO but need at least ${(value + 0.001).toFixed(3)} ALGO (including fee).`);
       return;
     }
     if (!campaign.creatorWallet) {
@@ -212,7 +222,7 @@ const CampaignDetailPage = () => {
             </div>
             <div className="flex items-center gap-2">
               <Clock size={16} className="text-amber-400" />
-              {isExpired ? "Campaign Closed" : `Ends on ${deadlineDate?.toLocaleDateString()}`}
+              {campaign.deadline && <CountdownTimer deadline={campaign.deadline} />}
             </div>
             {isDeleted && (
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-[10px] font-bold uppercase tracking-widest text-red-400">

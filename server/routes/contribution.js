@@ -30,7 +30,14 @@ router.post("/add", authMiddleware, async (req, res) => {
       return res.status(404).json({ message: "Campaign not found" });
     }
 
-    if (campaign.deadline && campaign.deadline < new Date()) {
+    // Strict status check: Only "active" campaigns can accept funds.
+    if (campaign.status !== "active") {
+      return res.status(400).json({ 
+        message: `This campaign is currently ${campaign.status} and cannot accept new contributions.` 
+      });
+    }
+
+    if (campaign.deadline && new Date(campaign.deadline) <= new Date()) {
       return res
         .status(400)
         .json({ message: "This campaign's deadline has passed" });

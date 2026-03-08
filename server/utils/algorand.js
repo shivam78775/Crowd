@@ -15,16 +15,19 @@ export const algodClient = new algosdk.Algodv2(ALGOD_TOKEN, ALGOD_NODE, ALGOD_PO
 export const sendFromEscrow = async (seed, toAddress, amountMicroAlgos) => {
   try {
     const params = await algodClient.getTransactionParams().do();
+    
+    if (!seed) throw new Error("Mnemonic (seed) is missing");
     const account = algosdk.mnemonicToSecretKey(seed);
     
-    // We need to leave some ALGO for the transaction fee (usually 1000 microAlgos)
-    // plus the minimum balance requirement (usually 100,000 microAlgos).
-    // However, for this simplified version, we assume the escrow has enough.
+    if (!account.addr) throw new Error("Escrow address could not be derived from mnemonic");
+    if (!toAddress) throw new Error("Recipient address (toAddress) is missing");
+
+    console.log(`[ALGO_SDK]: Sending from ${account.addr} to ${toAddress} | Amount: ${amountMicroAlgos}`);
     
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: account.addr,
       to: toAddress,
-      amount: amountMicroAlgos,
+      amount: Number(amountMicroAlgos),
       suggestedParams: params,
     });
 

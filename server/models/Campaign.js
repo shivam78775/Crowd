@@ -55,8 +55,13 @@ const campaignSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["active", "completed", "deleted", "withdrawn"],
+      enum: ["active", "completed", "failed", "deleted", "withdrawn"],
       default: "active",
+    },
+    refundStatus: {
+      type: String,
+      enum: ["n/a", "pending", "processing", "completed", "partial_failure"],
+      default: "n/a",
     },
   },
   { timestamps: { createdAt: "createdAt", updatedAt: "updatedAt" } }

@@ -32,6 +32,15 @@ const userSchema = new Schema(
         ref: "Contribution",
       },
     ],
+    notifications: [
+      {
+        message: String,
+        type: { type: String, enum: ["success", "info", "error", "refund"], default: "info" },
+        link: String,
+        read: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   { timestamps: true }
 );

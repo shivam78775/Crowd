@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.js";
 import campaignRoutes from "./routes/campaign.js";
 import contributionRoutes from "./routes/contribution.js";
 import userRoutes from "./routes/user.js";
+import { initRefundCron } from "./utils/refundCron.js";
 
 dotenv.config();
 
@@ -59,6 +60,8 @@ mongoose
     console.log("MongoDB connected");
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
+      // Initialize automated refund scheduler
+      initRefundCron();
     });
   })
   .catch((err) => {

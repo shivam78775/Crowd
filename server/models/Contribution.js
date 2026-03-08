@@ -35,12 +35,19 @@ const contributionSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["funded", "refunded"],
+      enum: ["funded", "refunded", "refund_failed"],
       default: "funded",
     },
     refundTxId: {
       type: String,
       trim: true,
+    },
+    refundError: {
+      type: String,
+    },
+    refundRetries: {
+      type: Number,
+      default: 0,
     },
     nftAssetId: {
       type: Number,

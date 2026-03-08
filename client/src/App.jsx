@@ -10,6 +10,7 @@ import CampaignListPage from "./pages/CampaignListPage";
 import CampaignDetailPage from "./pages/CampaignDetailPage";
 import CreateCampaignPage from "./pages/CreateCampaignPage";
 import ProfilePage from "./pages/ProfilePage";
+import HowToPage from "./pages/HowToPage";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -48,6 +49,7 @@ function App() {
                   </PrivateRoute>
                 }
               />
+              <Route path="/how-to" element={<HowToPage />} />
             </Routes>
           </Layout>
         </BrowserRouter>

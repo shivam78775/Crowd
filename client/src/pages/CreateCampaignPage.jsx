@@ -32,10 +32,17 @@ const CreateCampaignPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    if (new Date(form.deadline) < new Date()) {
+      toast.error("Deadline must be in the future.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const payload = {
         ...form,
         goalAmount: Number(form.goalAmount),
+        deadline: new Date(form.deadline).toISOString(),
       };
       await api.post("campaign/create", payload);
       toast.success("Project launched successfully! Welcome to orbit.");
@@ -133,7 +140,7 @@ const CreateCampaignPage = () => {
                   <div className="relative">
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                     <input
-                      type="date"
+                      type="datetime-local"
                       name="deadline"
                       value={form.deadline}
                       onChange={handleChange}

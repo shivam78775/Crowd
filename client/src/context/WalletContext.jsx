@@ -131,11 +131,18 @@ export const WalletProvider = ({ children }) => {
     }
 
     const suggestedParams = await algodClient.getTransactionParams().do();
+    const fee = Number(suggestedParams.fee > suggestedParams.minFee ? suggestedParams.fee : suggestedParams.minFee);
+    const totalAmountMicroAlgos = Math.round(amountAlgo * 1_000_000);
+    const totalNeededMicroAlgos = totalAmountMicroAlgos + fee;
+
+    if (balance !== null && balance * 1_000_000 < totalNeededMicroAlgos) {
+      throw new Error(`Insufficient balance. You need at least ${(totalNeededMicroAlgos / 1_000_000).toFixed(3)} ALGO but your balance is ${balance.toFixed(2)} ALGO.`);
+    }
 
     const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       sender,
       receiver: recipient,
-      amount: Math.round(amountAlgo * 1_000_000),
+      amount: totalAmountMicroAlgos,
       suggestedParams,
     });
 

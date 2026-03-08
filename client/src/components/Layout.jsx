@@ -6,7 +6,8 @@ import {
   LogOut, 
   Wallet, 
   Compass,
-  User as UserIcon
+  User as UserIcon,
+  HelpCircle
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useWallet } from "../context/WalletContext";
@@ -29,6 +30,7 @@ const Layout = ({ children }) => {
 
   const navLinks = [
     { to: "/campaigns", label: "Explore", icon: Compass },
+    { to: "/how-to", label: "Help", icon: HelpCircle },
     ...(user ? [
       { to: "/campaigns/create", label: "Create", icon: PlusCircle },
       { to: "/profile", label: "Profile", icon: UserIcon },
@@ -145,6 +147,7 @@ const Layout = ({ children }) => {
           <div className="flex items-center gap-6">
             <a href="#" className="text-xs text-slate-500 hover:text-white transition-colors">Privacy</a>
             <a href="#" className="text-xs text-slate-500 hover:text-white transition-colors">Terms</a>
+            <Link to="/how-to" className="text-xs text-slate-500 hover:text-white transition-colors">How-to Guide</Link>
             <a href="#" className="text-xs text-slate-500 hover:text-white transition-colors">Docs</a>
           </div>
         </div>
