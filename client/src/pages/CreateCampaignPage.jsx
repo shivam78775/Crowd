@@ -37,7 +37,7 @@ const CreateCampaignPage = () => {
         ...form,
         goalAmount: Number(form.goalAmount),
       };
-      await api.post("/campaign/create", payload);
+      await api.post("campaign/create", payload);
       toast.success("Project launched successfully! Welcome to orbit.");
       navigate("/campaigns");
     } catch (err) {

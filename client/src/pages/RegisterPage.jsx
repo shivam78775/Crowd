@@ -19,7 +19,7 @@ const RegisterPage = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await api.post("/auth/register", form);
+      const { data } = await api.post("auth/register", form);
       login(data);
       toast.success("Welcome to the Fundify community!");
       navigate("/campaigns");

@@ -14,7 +14,7 @@ const CampaignListPage = () => {
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
-        const { data } = await api.get("/campaign/all");
+        const { data } = await api.get("campaign/all");
         setCampaigns(data);
       } catch (err) {
         const message =

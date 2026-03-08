@@ -34,7 +34,7 @@ const CampaignDetailPage = () => {
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
-        const { data } = await api.get(`/campaign/${id}`);
+        const { data } = await api.get(`campaign/${id}`);
         setCampaign(data);
       } catch (err) {
         const message =
@@ -87,7 +87,7 @@ const CampaignDetailPage = () => {
         amountAlgo: value,
       });
 
-      const { data } = await api.post("/contribution/add", {
+      const { data } = await api.post("contribution/add", {
         campaignId: id,
         amount: value,
         contributorWallet: accountAddress,
@@ -101,7 +101,7 @@ const CampaignDetailPage = () => {
 
       setTimeout(async () => {
         try {
-          const { data: updatedData } = await api.get(`/campaign/${id}`);
+          const { data: updatedData } = await api.get(`campaign/${id}`);
           setCampaign(updatedData);
         } catch (e) {
           // ignore
@@ -154,9 +154,9 @@ const CampaignDetailPage = () => {
   const handleWithdraw = async () => {
     try {
       setContributing(true);
-      await api.post(`/campaign/${id}/withdraw`);
+      await api.post(`campaign/${id}/withdraw`);
       toast.success("Funds withdrawn to your wallet!");
-      const { data } = await api.get(`/campaign/${id}`);
+      const { data } = await api.get(`campaign/${id}`);
       setCampaign(data);
     } catch (err) {
       toast.error(err.response?.data?.message || "Withdrawal failed");
@@ -168,9 +168,9 @@ const CampaignDetailPage = () => {
   const handleRefund = async () => {
     try {
       setContributing(true);
-      await api.post(`/campaign/${id}/refund`);
+      await api.post(`campaign/${id}/refund`);
       toast.success("Refund processed successfully!");
-      const { data } = await api.get(`/campaign/${id}`);
+      const { data } = await api.get(`campaign/${id}`);
       setCampaign(data);
       refreshBalance();
     } catch (err) {

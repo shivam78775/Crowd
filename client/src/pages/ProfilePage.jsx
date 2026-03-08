@@ -39,7 +39,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const { data } = await api.get("/user/dashboard");
+        const { data } = await api.get("user/dashboard");
         setData(data);
       } catch (err) {
         const message =
@@ -100,9 +100,9 @@ const ProfilePage = () => {
 
     try {
       setLoading(true);
-      await api.delete(`/campaign/${campaignId}`);
+      await api.delete(`campaign/${campaignId}`);
       toast.success("Campaign deleted successfully.");
-      const { data: updatedData } = await api.get("/user/dashboard");
+      const { data: updatedData } = await api.get("user/dashboard");
       setData(updatedData);
     } catch (err) {
       toast.error(err.response?.data?.message || "Delete failed");
