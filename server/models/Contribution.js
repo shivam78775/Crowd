@@ -42,6 +42,15 @@ const contributionSchema = new Schema(
       type: String,
       trim: true,
     },
+    nftAssetId: {
+      type: Number,
+      default: null,
+    },
+    nftStatus: {
+      type: String,
+      enum: ["none", "minting", "issued", "failed"],
+      default: "none",
+    },
   },
   { timestamps: false }
 );

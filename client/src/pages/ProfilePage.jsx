@@ -15,7 +15,8 @@ import {
   Mail,
   Clock,
   Info,
-  Trash2
+  Trash2,
+  Award
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -76,18 +77,17 @@ const ProfilePage = () => {
     setIsModalOpen(true);
   };
 
-  const handleRefund = async (contribution) => {
-    try {
-      setLoading(true);
-      await api.post(`/campaign/${contribution.campaignId._id}/refund`);
-      toast.success("Refund processed successfully!");
-      const { data: updatedData } = await api.get("/user/dashboard");
-      setData(updatedData);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Refund failed");
-    } finally {
-      setLoading(false);
-    }
+  const getTier = (amount) => {
+    if (amount >= 50) return "gold";
+    if (amount >= 20) return "silver";
+    if (amount >= 5) return "bronze";
+    return null;
+  };
+
+  const TIER_COLORS = {
+    bronze: "text-orange-500",
+    silver: "text-slate-300",
+    gold: "text-amber-400"
   };
 
   const handleDelete = async (e, campaignId) => {
@@ -343,8 +343,13 @@ const ProfilePage = () => {
                       <div className="font-bold text-white text-sm line-clamp-1 group-hover:text-brand-400 transition-colors">
                         {c.campaignId?.title ?? "Project Support"}
                       </div>
-                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 flex items-center gap-2">
                         {c.contributedAt ? new Date(c.contributedAt).toLocaleDateString() : 'Recent'}
+                        {getTier(c.amount) && (
+                          <span className={`flex items-center gap-0.5 ${TIER_COLORS[getTier(c.amount)]}`}>
+                            <Award size={10} /> {getTier(c.amount).toUpperCase()}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

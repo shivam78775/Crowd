@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { X, Copy, Check, ExternalLink, ShieldCheck, Wallet, Calendar, Hash } from "lucide-react";
+import { X, Copy, Check, ExternalLink, ShieldCheck, Wallet, Calendar, Hash, Award, Box } from "lucide-react";
 
 const ContributionDetailModal = ({ isOpen, onClose, contribution }) => {
   const [copiedField, setCopiedField] = useState(null);
@@ -23,6 +23,22 @@ const ContributionDetailModal = ({ isOpen, onClose, contribution }) => {
 
   const shortenedHash = (hash) => `${hash?.slice(0, 10)}...${hash?.slice(-10)}`;
   const shortenedWallet = (address) => `${address?.slice(0, 8)}...${address?.slice(-8)}`;
+
+  const getTier = (amount) => {
+    if (amount >= 50) return "gold";
+    if (amount >= 20) return "silver";
+    if (amount >= 5) return "bronze";
+    return null;
+  };
+
+  const tier = getTier(contribution.amount);
+  const BADGE_CONFIG = {
+    bronze: { color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", label: "Bronze Supporter", icon: Award },
+    silver: { color: "text-slate-300", bg: "bg-slate-300/10", border: "border-slate-300/20", label: "Silver Supporter", icon: Award },
+    gold: { color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20", label: "Gold Supporter", icon: Award },
+  };
+
+  const TierIcon = tier ? BADGE_CONFIG[tier].icon : Award;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4 py-6">
@@ -80,6 +96,39 @@ const ContributionDetailModal = ({ isOpen, onClose, contribution }) => {
                 </div>
               </div>
             </div>
+
+            {/* NFT Badge Section */}
+            {tier && (
+              <div className={`p-6 rounded-[32px] border ${BADGE_CONFIG[tier].border} ${BADGE_CONFIG[tier].bg} relative overflow-hidden group/badge`}>
+                <div className="absolute -right-4 -bottom-4 opacity-10 group-hover/badge:scale-110 transition-transform duration-700">
+                  <TierIcon size={120} />
+                </div>
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-14 h-14 rounded-2xl ${BADGE_CONFIG[tier].bg} border ${BADGE_CONFIG[tier].border} flex items-center justify-center ${BADGE_CONFIG[tier].color} shadow-lg shadow-black/20`}>
+                      <TierIcon size={32} />
+                    </div>
+                    <div>
+                      <div className={`text-[10px] font-black uppercase tracking-widest ${BADGE_CONFIG[tier].color}`}>Tier Earned</div>
+                      <h4 className="text-lg font-black text-white italic uppercase tracking-tighter">{BADGE_CONFIG[tier].label}</h4>
+                    </div>
+                  </div>
+                  {contribution.nftAssetId && (
+                    <div className="text-right">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Asset ID</div>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/40 border border-white/10 font-mono text-xs text-brand-400">
+                        <Box size={12} /> {contribution.nftAssetId}
+                      </div>
+                    </div>
+                  )}
+                  {contribution.nftStatus === 'minting' && (
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-full border border-amber-500/20 animate-pulse">
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" /> Minting on Chain...
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* ID & Address Section */}
             <div className="space-y-4">

@@ -3,6 +3,7 @@ import Campaign from "../models/Campaign.js";
 import Contribution from "../models/Contribution.js";
 import User from "../models/User.js";
 import { authMiddleware } from "../middleware/auth.js";
+import { mintBadgeNFT } from "../utils/nft.js";
 
 const router = express.Router();
 
@@ -51,6 +52,9 @@ router.post("/add", authMiddleware, async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       $push: { contributions: contribution._id },
     });
+
+    // Automatically trigger NFT minting process (async, don't wait for it to finish the response)
+    mintBadgeNFT(contribution._id).catch(err => console.error("NFT Background Minting Error:", err));
 
     const updatedCampaign = await Campaign.findById(campaignId)
       .populate("creator", "name")
