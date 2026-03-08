@@ -23,7 +23,7 @@ const Illustration = ({ src, alt }) => (
   <div className="relative group overflow-hidden rounded-[32px] border border-white/10 bg-slate-900 aspect-video mb-6">
     <div className="absolute inset-0 bg-gradient-to-tr from-brand-600/20 to-transparent pointer-events-none z-10" />
     <img 
-      src={`/${src.split('\\').pop()}`} 
+      src={`/${src}`} 
       alt={alt} 
       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80" 
     />
